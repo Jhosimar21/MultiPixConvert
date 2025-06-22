@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MultiPixConvert</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="estilos.css" />
+
+  <!-- JSZip para crear ZIPs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    * {
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #828891;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #logo {
+      width: 150px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 3em;
+      color: #2f395a;
+      margin: 0;
+    }
+
+    .subtitulo {
+      color: #444;
+    }
+
+    main {
+      width: 100%;
+      max-width: 500px;
+      background-color: #a4c2c8;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      padding: 50px;
+      text-align: center;
+    }
+
+    main.arrastrando {
+      border: 10px dashed #2f395a;
+      background-color: #4a5d72;
+    }
+
+    .custom-file-label {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      background-color: #2f395a;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .custom-file-label:hover {
+      background-color: #1d2c45;
+    }
+
+    .drop-text {
+      font-size: 0.95em;
+      color: #444;
+    }
+
+    footer {
+      margin-top: 40px;
+      color: #666;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-contenido {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .cerrar {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 15px 0;
+    }
+
+    .preview-container img {
+      max-width: 100px;
+      max-height: 100px;
+      margin: 5px;
+      border-radius: 8px;
+    }
+
+    .boton-descarga {
+      background-color: #2f395a;
+      color: white;
+      padding: 12px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    .boton-descarga:hover {
+      background-color: #1d2c45;
+    }
+
+    .oculto {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <picture>
+      <source srcset="logo.avif" type="image/avif">
+      <source srcset="logo.webp" type="image/webp">
+      <source srcset="logo.jpeg" type="image/jpeg">
+      <img src="logo.png" alt="Logo de MultiPixConvert" id="logo">
+    </picture>
+    <h1>MultiPixConvert</h1>
+    <p class="subtitulo">Convertidor de Imágenes PNG, JPG, WEBP, AVIF</p>
+  </header>
+
+  <main id="drop-zone">
+    <form id="convert-form">
+      <!-- Permitir múltiples -->
+      <input type="file" id="image-input" hidden multiple accept="image/*" />
+      <label for="image-input" class="custom-file-label">Seleccionar Imágenes</label>
+      <p class="drop-text">o suelta las imágenes aquí</p>
+    </form>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="modal oculto">
+    <div class="modal-contenido">
+      <span class="cerrar" id="cerrarModal">&times;</span>
+      <h2>Vista previa</h2>
+
+      <!-- Aquí van los thumbnails -->
+      <div id="preview-container" class="preview-container"></div>
+
+      <label for="format">Formato de descarga:</label>
+      <select id="format">
+        <option value="png">PNG</option>
+        <option value="jpg">JPG</option>
+        <option value="webp">WEBP</option>
+        <option value="avif">AVIF</option>
+      </select>
+
+      <button id="downloadBtn" class="boton-descarga">
+        Descargar convertidas
+      </button>
+    </div>
+  </div>
+
+  <footer>
+    <p class="drop-text">&copy; 2025 MultiPixConvert</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const imageInput = document.getElementById("image-input");
+    const dropZone = document.getElementById("drop-zone");
+    const modal = document.getElementById("modal");
+    const previewContainer = document.getElementById("preview-container");
+    const formatSelect = document.getElementById("format");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const cerrarModal = document.getElementById("cerrarModal");
+
+    // Cuando cambian las imágenes seleccionadas
+    imageInput.addEventListener("change", () => {
+      openModal(Array.from(imageInput.files));
+    });
+
+    // Arrastrar & soltar
+    dropZone.addEventListener("dragover", e => e.preventDefault());
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) {
+        imageInput.files = e.dataTransfer.files;
+        openModal(Array.from(e.dataTransfer.files));
+      }
+    });
+
+    // Abre modal y genera thumbnails
+    function openModal(files) {
+      previewContainer.innerHTML = "";
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+      modal.classList.remove("oculto");
+    }
+
+    // Cierra modal
+    cerrarModal.addEventListener("click", () => modal.classList.add("oculto"));
+    modal.addEventListener("click", e => {
+      if (e.target === modal) modal.classList.add("oculto");
+    });
+
+    // Descarga: individual o ZIP
+    downloadBtn.addEventListener("click", () => {
+      const files = Array.from(imageInput.files);
+      const format = formatSelect.value;
+      if (files.length === 1) {
+        // descarga individual
+        convertAndDownload(files[0], format);
+      } else {
+        // crea ZIP
+        const zip = new JSZip();
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const promises = files.map(file => new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx.drawImage(img, 0, 0);
+              canvas.toBlob(blob => {
+                const name = file.name.replace(/\.[^/.]+$/, "") + "." + format;
+                const mime = `image/${format === 'jpg' ? 'jpeg' : format}`;
+                zip.file(name, blob, { binary: true });
+                resolve();
+              }, `image/${format === 'jpg' ? 'jpeg' : format}`);
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }));
+
+        Promise.all(promises).then(() => {
+          zip.generateAsync({ type: "blob" }).then(content => {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(content);
+            link.download = "imagenes_convertidas.zip";
+            link.click();
+          });
+        });
+      }
+      modal.classList.add("oculto");
+    });
+
+    // Función para convertir y descargar una sola imagen
+    function convertAndDownload(file, format) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          canvas.getContext("2d").drawImage(img, 0, 0);
+          canvas.toBlob(blob => {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = file.name.replace(/\.[^/.]+$/, "") + "." + format;
+            link.click();
+          }, `image/${format === 'jpg' ? 'jpeg' : format}`);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</body>
+
+</html>

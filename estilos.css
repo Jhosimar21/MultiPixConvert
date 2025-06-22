@@ -1,0 +1,205 @@
+:root {
+  --azul: #2f395a;
+  --azul-claro: #4a5d72;
+  --gris-claro: #828891;
+  --gris: #dee2e6;
+  --sombra: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --borde-redondo: 12px;
+  --blanco: #ffffff;
+  --rojo: #dc3545;
+}
+
+/* ====== Estilos globales ====== */
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--gris-claro);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* ====== Cabecera ====== */
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#logo {
+  width: 150px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-size: 3em;
+  color: var(--azul);
+  margin: 0;
+}
+
+.subtitulo {
+  color: #444;
+}
+
+/* ====== Contenedor principal ====== */
+main {
+  width: 100%;
+  max-width: 500px;
+  background-color: rgb(164, 194, 200);
+  border-radius: var(--borde-redondo);
+  box-shadow: var(--sombra);
+  padding: 50px;
+}
+
+main.arrastrando {
+  border: 10px dashed var(--azul);
+  background-color: var(--azul-claro);
+}
+
+/* ====== Formulario de carga ====== */
+label {
+  font-weight: 600;
+  margin-top: 10px;
+  text-align: center;
+  display: block;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 15px;
+  border: 1px solid var(--gris);
+  border-radius: var(--borde-redondo);
+  font-size: 1em;
+}
+
+.custom-file-label {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  background-color: var(--azul);
+  color: var(--blanco);
+  text-align: center;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: var(--borde-redondo);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.custom-file-label:hover,
+.custom-file-label:focus {
+  background-color: var(--azul-claro);
+  outline: none;
+}
+
+/* ====== Texto de ayuda ====== */
+.drop-text {
+  text-align: center;
+  font-size: 0.95em;
+  color: #444;
+  margin-bottom: 15px;
+}
+
+/* ====== Modal ====== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: var(--blanco);
+  padding: 20px;
+  border-radius: var(--borde-redondo);
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: var(--sombra);
+  position: relative;
+}
+
+.cerrar {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.preview-container img {
+  max-width: 100px;
+  max-height: 100px;
+  margin: 5px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+/* ====== Botón de descarga ====== */
+.boton-descarga {
+  background-color: var(--azul);
+  color: var(--blanco);
+  padding: 12px 20px;
+  font-size: 1em;
+  border: none;
+  border-radius: var(--borde-redondo);
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.boton-descarga:hover,
+.boton-descarga:focus {
+  background-color: var(--azul-claro);
+  outline: none;
+}
+
+/* ====== Utilidades ====== */
+.oculto {
+  display: none;
+}
+
+.active-drop {
+  border: 2px dashed var(--azul);
+  background-color: var(--azul-claro);
+}
+
+/* ====== Pie de página ====== */
+footer {
+  margin-top: 40px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 600px) {
+  main {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6em;
+  }
+}
